@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="tr"> 
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Wetzlar Maç Daveti</title> 
+  <link rel="stylesheet" href="style.css"> 
+  <link rel="icon" href="favicon.ico" type="image/x-icon"> 
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&amp;display=swap" rel="stylesheet"> 
+ <style type="text/css" id="dcoder_stylesheet">/* Genel Ayarlar ve Font */
+:root {
+    --primary-green: #4CAF50;
+    --primary-blue: #2196F3;
+    --primary-white: #FFFFFF;
+    --dark-bg: #1A1A2E;
+    --dark-card-bg: rgba(30, 30, 46, 0.9);
+    --dark-text: #E0E0E0;
+    --light-bg: #F0F2F5;
+    --light-card-bg: rgba(255, 255, 255, 0.9);
+    --light-text: #333333;
+    --border-radius: 12px;
+    --transition-speed: 0.5s ease-in-out;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: var(--light-bg);
+    color: var(--light-text);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+    overflow-x: hidden; /* Yatay kaydırmayı önle */
+}
+
+/* Dark Mode Ayarları */
+body.dark-mode {
+    background-color: var(--dark-bg);
+    color: var(--dark-text);
+}
+
+.dark-mode .card {
+    background-color: var(--dark-card-bg);
+}
+
+/* Giriş Anı Animasyonu */
+.intro-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 1); /* Başlangıçta tamamen siyah */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 2s ease-out; /* Kararmadan transparanlığa geçiş süresi */
+}
+
+.intro-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.field-silhouette {
+    width: 80%;
+    max-width: 600px;
+    height: auto;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 1.5s forwards 1s; /* Siluetin ortaya çıkışı */
+}
+
+.intro-text {
+    color: var(--primary-white);
+    font-size: 2.5em;
+    margin-top: 20px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInSlideUp 1.5s forwards 2.5s; /* Metnin ortaya çıkışı */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes fadeInSlideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header ve Tema Değiştirme Butonu */
+.header {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+}
+
+.theme-toggle {
+    background: none;
+    border: 2px solid var(--primary-blue);
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1.5em;
+    transition: background-color 0.3s, border-color 0.3s;
+    outline: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle:hover {
+    background-color: var(--primary-blue);
+}
+
+body.dark-mode .theme-toggle {
+    border-color: var(--primary-green);
+}
+
+body.dark-mode .theme-toggle:hover {
+    background-color: var(--primary-green);
+}
+
+.theme-toggle .icon {
+    display: block;
+}
+
+body.dark-mode .light-icon {
+    display: none;
+}
+
+body:not(.dark-mode) .dark-icon {
+    display: none;
+}
+
+/* Ana İçerik Konteynerı */
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: 80px; /* Header ile çakışmaması için */
+}
+
+/* Kart Stil Tanımlamaları */
+.card {
+    background-color: var(--light-card-bg);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px); /* Yarı saydamlık efekti */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out, background-color var(--transition-speed);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.section-title {
+    font-size: 2em;
+    color: var(--primary-blue);
+    margin-bottom: 25px;
+    border-bottom: 3px solid var(--primary-green);
+    padding-bottom: 10px;
+    display: inline-block;
+    transition: color var(--transition-speed);
+}
+
+body.dark-mode .section-title {
+    color: var(--primary-green);
+}
+
+/* Scroll Animasyonları */
+.slide-in-left {
+    opacity: 0;
+    transform: translateX(-100px);
+}
+
+.slide-in-right {
+    opacity: 0;
+    transform: translateX(100px);
+}
+
+.slide-in-up {
+    opacity: 0;
+    transform: translateY(50px);
+}
+
+.visible {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+/* Tanıtım ve Davet Bölümü */
+.hero-content p {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+.hero-content p:last-child {
+    margin-bottom: 0;
+    font-weight: 600;
+}
+
+/* Geri Sayım */
+.countdown-timer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: 700;
+    color: var(--primary-green);
+    gap: 15px;
+}
+
+.countdown-timer .time-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 15px 20px;
+    border-radius: var(--border-radius);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.1s ease-out;
+}
+
+body.dark-mode .countdown-timer .time-unit {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.countdown-timer .time-unit span {
+    font-size: 1.8em;
+    margin-bottom: 5px;
+}
+
+/* Harita Bölümü */
+.map-container {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.map-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.map-button {
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-button:hover {
+    background-color: #1976D2;
+    transform: translateY(-2px);
+}
+
+.transport-options {
+    display: flex;
+    gap: 10px;
+}
+
+/* Katılımcı Listesi */
+.participant-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.participant-card {
+    background-color: var(--primary-white);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    cursor: default;
+}
+
+body.dark-mode .participant-card {
+    background-color: rgba(50, 50, 70, 0.9);
+    color: var(--dark-text);
+}
+
+.participant-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
+}
+
+.participant-card .avatar {
+    font-size: 3em;
+    margin-bottom: 10px;
+    color: var(--primary-green);
+}
+
+.participant-card .name {
+    font-weight: 600;
+    font-size: 1.2em;
+    margin-bottom: 5px;
+}
+
+.participant-card .status-text {
+    font-size: 0.9em;
+    color: #666;
+    transition: opacity 0.3s ease;
+}
+
+body.dark-mode .participant-card .status-text {
+    color: #BBB;
+}
+
+.participant-card.your-status {
+    background-color: #E0E0E0;
+    cursor: pointer;
+}
+
+body.dark-mode .participant-card.your-status {
+    background-color: rgba(70, 70, 90, 0.9);
+}
+
+.participant-card.your-status .status-text {
+    color: #777;
+}
+
+body.dark-mode .participant-card.your-status .status-text {
+    color: #999;
+}
+
+.participant-card.your-status .action-buttons {
+    position: absolute;
+    bottom: -100%; /* Başlangıçta görünmez */
+    left: 0;
+    width: 100%;
+    background-color: var(--primary-white);
+    padding: 15px 0;
+    display: flex;
+    justify-content: space-around;
+    transition: bottom 0.3s ease-out;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+}
+
+body.dark-mode .participant-card.your-status .action-buttons {
+    background-color: rgba(50, 50, 70, 0.9);
+}
+
+.participant-card.your-status.active .action-buttons {
+    bottom: 0; /* Tıklanınca yukarı kayar */
+}
+
+.action-button {
+    background: none;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.confirm-button {
+    color: var(--primary-green);
+    border: 2px solid var(--primary-green);
+}
+.confirm-button:hover {
+    background-color: var(--primary-green);
+    color: var(--primary-white);
+    transform: translateY(-2px);
+}
+
+.decline-button {
+    color: #F44336;
+    border: 2px solid #F44336;
+}
+.decline-button:hover {
+    background-color: #F44336;
+    color: var(--primary-white);
+    transform: translateY(-2px);
+}
+
+/* Formla Katılım Bölümü */
+.form-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.mail-button {
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+    padding: 15px 25px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.mail-button:hover {
+    background-color: #1976D2;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.mail-button.decline {
+    background-color: #F44336;
+}
+
+.mail-button.decline:hover {
+    background-color: #D32F2F;
+}
+
+/* Hatırlatma Sistemi */
+.reminder-options {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.checkbox-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    font-size: 1.1em;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.checkbox-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #eee;
+    border-radius: 5px;
+    transition: background-color 0.2s;
+}
+
+body.dark-mode .checkmark {
+    background-color: #555;
+}
+
+.checkbox-container:hover input ~ .checkmark {
+    background-color: #ccc;
+}
+
+body.dark-mode .checkbox-container:hover input ~ .checkmark {
+    background-color: #777;
+}
+
+.checkbox-container input:checked ~ .checkmark {
+    background-color: var(--primary-green);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.checkbox-container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.calendar-button {
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+    padding: 15px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-button:hover {
+    background-color: #1976D2;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888;
+    font-size: 0.9em;
+    margin-top: 50px;
+}
+
+.footer p {
+    margin: 5px 0;
+}
+
+.footer .signature {
+    font-style: italic;
+    font-size: 0.8em;
+    color: #666;
+    margin-top: 15px;
+}
+
+body.dark-mode .footer {
+    color: #aaa;
+}
+
+body.dark-mode .footer .signature {
+    color: #888;
+}
+
+/* Küçük Ekranlar İçin Duyarlı Tasarım */
+@media (max-width: 768px) {
+    .intro-text {
+        font-size: 1.8em;
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .container {
+        padding: 15px;
+        padding-top: 70px;
+    }
+
+    .section-title {
+        font-size: 1.8em;
+    }
+
+    .countdown-timer {
+        font-size: 1.8em;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .countdown-timer .time-unit {
+        padding: 10px 15px;
+        flex: 1 1 45%; /* Yan yana iki sütun */
+    }
+
+    .map-options {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .map-button {
+        width: 100%;
+        text-align: center;
+    }
+
+    .transport-options {
+        flex-direction: column;
+    }
+
+    .participant-list {
+        grid-template-columns: 1fr; /* Tek sütun */
+    }
+
+    .form-options {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .intro-text {
+        font-size: 1.5em;
+    }
+
+    .theme-toggle {
+        width: 40px;
+        height: 40px;
+        font-size: 1.3em;
+    }
+
+    .section-title {
+        font-size: 1.5em;
+    }
+
+    .countdown-timer {
+        font-size: 1.5em;
+    }
+
+    .mail-button, .calendar-button {
+        font-size: 1em;
+        padding: 12px 20px;
+    }
+}</style></head> 
+ <body> 
+  <div class="intro-overlay" id="introOverlay"> 
+   <img src="football-field-silhouette.png" alt="Futbol Sahası Silueti" class="field-silhouette"> 
+   <h1 class="intro-text">⚽ Emir, sende davetlisin!</h1> 
+  </div> 
+  <header class="header"> <button id="themeToggle" class="theme-toggle"> <span class="icon light-icon">☀️</span> <span class="icon dark-icon">🌙</span> </button> 
+  </header> 
+  <main class="container"> 
+   <section class="hero-section" id="heroSection"> 
+    <div class="hero-content"> 
+     <div class="card transparent-card slide-in-left"> 
+      <p class="greeting">🧑‍🤝‍🧑 Ben Halil. Wetzlar’a hoş geldin! Yarın saat 16:00’da merkezdeki sahada futbol oynayacaz.</p> 
+      <p class="details">🗓️ Şu an 3 kişiyiz: ben, Kardeşim Ali Osman ve arkadaşım İsmail.</p> 
+      <p class="invitation">⚽ Sen de gelmek ister misin? 4. oyuncumuz olmanı çok isteriz.</p> 
+     </div> 
+    </div> 
+   </section> 
+   <section class="countdown-section"> 
+    <div class="card transparent-card slide-in-right"> 
+     <h2 class="section-title">⏳ Maça Kalan Süre</h2> 
+     <div id="countdown" class="countdown-timer"> 
+      <div class="time-unit"> <span id="days">00</span> Gün 
+      </div> 
+      <div class="time-unit"> <span id="hours">00</span> Saat 
+      </div> 
+      <div class="time-unit"> <span id="minutes">00</span> Dakika 
+      </div> 
+      <div class="time-unit"> <span id="seconds">00</span> Saniye 
+      </div> 
+     </div> 
+    </div> 
+   </section> 
+   <section class="map-section"> 
+    <div class="card transparent-card slide-in-up"> 
+     <h2 class="section-title">📍 Saha Konumu</h2> 
+     <div class="map-container"> <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2516.326883226771!2d8.490799776856518!3d50.55940427156942!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47bd06ddc9e1e3b3%3A0xf69305f6e1f0e47!2sSG%20Rot-Wei%C3%9F%20Wetzlar%201920%20e.V.!5e0!3m2!1str!2sde!4v1718749800000!5m2!1str!2sde" width="100%" height="450" style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> 
+     </div> 
+     <div class="map-options"> <a href="https://www.google.com/maps/dir/?api=1&amp;destination=SG+Rot-Weiß+Wetzlar+1920+e.V.,+Gabelsbergerstraße+66,+35576+Wetzlar" target="_blank" class="map-button nav-button">Navigasyona Başla</a> 
+      <div class="transport-options"> <a href="https://www.google.com/maps/dir/Current+Location/SG+Rot-Weiß+Wetzlar+1920+e.V.,+Gabelsbergerstraße+66,+35576+Wetzlar/@50.5594042,8.4907998,17z/data=!3m1!4b1!4m9!4m8!1m1!4e1!1m5!1m1!1s0x47bd06ddc9e1e3b3:0xf69305f6e1f0e47!2m2!1d8.4933747!2d50.5594042!3e2" target="_blank" class="map-button">Yaya</a> <a href="https://www.google.com/maps/dir/Current+Location/SG+Rot-Weiß+Wetzlar+1920+e.V.,+Gabelsbergerstraße+66,+35576+Wetzlar/@50.5594042,8.4907998,17z/data=!3m1!4b1!4m9!4m8!1m1!4e1!1m5!1m1!1s0x47bd06ddc9e1e3b3:0xf69305f6e1f0e47!2m2!1d8.4933747!2d50.5594042!3e1" target="_blank" class="map-button">Bisiklet</a> <a href="https://www.google.com/maps/dir/Current+Location/SG+Rot-Weiß+Wetzlar+1920+e.V.,+Gabelsbergerstraße+66,+35576+Wetzlar/@50.5594042,8.4907998,17z/data=!3m1!4b1!4m9!4m8!1m1!4e1!1m5!1m1!1s0x47bd06ddc9e1e3b3:0xf69305f6e1f0e47!2m2!1d8.4933747!2d50.5594042!3e3" target="_blank" class="map-button">Toplu Taşıma</a> 
+      </div> 
+     </div> 
+    </div> 
+   </section> 
+   <section class="participants-section"> 
+    <div class="card transparent-card slide-in-left"> 
+     <h2 class="section-title">🟩 Katılımcılar</h2> 
+     <div class="participant-list"> 
+      <div class="participant-card" data-status="katıldı"> <span class="avatar">👤</span> <span class="name">Halil</span> <span class="status-text">✅ Katıldı</span> 
+      </div> 
+      <div class="participant-card" data-status="geliyor"> <span class="avatar">👤</span> <span class="name">Ali Osman</span> <span class="status-text">✅ Geliyor</span> 
+      </div> 
+      <div class="participant-card" data-status="katılıyor"> <span class="avatar">👤</span> <span class="name">İsmail</span> <span class="status-text">✅ Katılıyor</span> 
+      </div> 
+      <div class="participant-card your-status" data-status="bekleniyor" id="emirCard"> <span class="avatar">👤</span> <span class="name">Emir</span> <span class="status-text">❓ Cevap Bekleniyor ( buraya tıklayarak yanitlayabilirsin) )</span> 
+       <div class="action-buttons"> <button class="action-button confirm-button" data-action="confirm">✅ Geliyorum</button> <button class="action-button decline-button" data-action="decline">❌ Gelemeyeceğim</button> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+   </section> 
+   <section class="form-section"> 
+    <div class="card transparent-card slide-in-right"> 
+     <h2 class="section-title">📩 Alternatif Katılım</h2> 
+     <div class="form-options"> <a href="mailto:higeryazilim@gmail.com?subject=Futbol%20Ma%C3%A7%C4%B1na%20Kat%C4%B1l%C4%B1yorum&amp;body=Selam%20Halil,%20futbol%20ma%C3%A7%C4%B1na%20geliyorum!" class="mail-button">Katılacağım (Mail)</a> <a href="mailto:higeryazilim@gmail.com?subject=Futbol%20Ma%C3%A7%C4%B1na%20Kat%C4%B1lam%C4%B1yorum&amp;body=Selam%20Halil,%20maalesef%20bu%20defa%20kat%C4%B1lam%C4%B1yorum%20ama%20bir%20dahaki%20sefere%20kesin!" class="mail-button decline">Katılmayacağım (Mail)</a> 
+     </div> 
+    </div> 
+   </section> 
+   <section class="reminder-section"> 
+    <div class="card transparent-card slide-in-up"> 
+     <h2 class="section-title">🔔 Hatırlatma Al</h2> 
+     <div class="reminder-options"> <label class="checkbox-container"> <input type="checkbox" id="whatsappReminder"> <span class="checkmark"></span> WhatsApp'tan mesajla hatırlat </label> <button id="calendarReminder" class="calendar-button">Takvime Ekle (iCal)</button> 
+     </div> 
+    </div> 
+   </section> 
+  </main> 
+  <footer class="footer"> 
+   <p>"Yarın, 16:00. Bekliyoruz."</p> 
+   <p class="signature">Higer Yazılım</p> 
+  </footer> 
+  <script src="script.js"></script> 
+ 
+<script type="text/javascript" id="dcoder_script">// Sayfa Yüklendiğinde İlk Ekran Animasyonu
+document.addEventListener('DOMContentLoaded', () => {
+    const introOverlay = document.getElementById('introOverlay');
+    const introText = document.querySelector('.intro-text');
+
+    // Sahadan gelen ambiyans sesleri (örnek: hafif rüzgar, kuş cıvıltısı, uzaktan seyirci sesi)
+    // Gerçek bir proje için düşük döngülü, hafif bir arka plan sesi dosyası kullanın.
+    // const ambientSound = new Audio('ambient_stadium.mp3'); // Ses dosyanızı buraya ekleyin
+    // ambientSound.loop = true;
+    // ambientSound.volume = 0.4; // Ses seviyesi
+
+    setTimeout(() => {
+        // ambientSound.play(); // Sesi başlat (tarayıcı izin verirse)
+        introText.style.opacity = '1';
+        introText.style.transform = 'translateY(0)';
+    }, 2500); // Metin animasyonu 2.5 saniye sonra başlar
+
+    setTimeout(() => {
+        introOverlay.classList.add('hidden');
+        // ambientSound.pause(); // Animasyon bitince sesi durdurabilir veya kısabilirsiniz
+        // ambientSound.volume = 0;
+    }, 5500); // Toplam animasyon süresi (kararma + siluet + metin + bekleme)
+});
+
+// Tema Değiştirme (Dark/Light Mode)
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+
+// Otomatik Dark Mode (Sadece geceleri)
+const currentHour = new Date().getHours();
+if (currentHour >= 20 || currentHour < 6) { // Akşam 8 ile sabah 6 arası karanlık mod
+    body.classList.add('dark-mode');
+}
+
+themeToggle.addEventListener('click', () => {
+    body.classList.toggle('dark-mode');
+    // Kullanıcının tercihini localStorage'a kaydet (isteğe bağlı)
+    if (body.classList.contains('dark-mode')) {
+        localStorage.setItem('theme', 'dark');
+    } else {
+        localStorage.setItem('theme', 'light');
+    }
+});
+
+// Kullanıcının kaydedilmiş temasını yükle
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'dark') {
+    body.classList.add('dark-mode');
+} else if (savedTheme === 'light') {
+    body.classList.remove('dark-mode');
+}
+
+// Canlı Geri Sayım
+const countdown = document.getElementById('countdown');
+const matchDate = new Date('June 20, 2025 16:00:00').getTime(); // 20 Haziran saat 16:00
+
+function updateCountdown() {
+    const now = new Date().getTime();
+    const distance = matchDate - now;
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById('days').innerText = String(days).padStart(2, '0');
+    document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+    document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+    document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+
+    // Hafif titreşim animasyonu (her saniye)
+    const timeUnits = countdown.querySelectorAll('.time-unit span');
+    timeUnits.forEach(unit => {
+        unit.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+            unit.style.transform = 'scale(1)';
+        }, 100);
+    });
+
+    if (distance < 0) {
+        clearInterval(countdownInterval);
+        countdown.innerHTML = "Maç Başladı!";
+        countdown.style.color = "var(--primary-blue)";
+    }
+}
+
+const countdownInterval = setInterval(updateCountdown, 1000);
+updateCountdown(); // Sayfa yüklendiğinde bir kere çalıştır
+
+// Sayfa Kaydırma Animasyonları (Scroll Reveal)
+const cards = document.querySelectorAll('.card');
+
+const observer = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target); // Animasyon bir kez tetiklendikten sonra gözlemlemeyi durdur
+        }
+    });
+}, {
+    threshold: 0.2, // Yüzde 20'si görünür olduğunda tetikle
+});
+
+cards.forEach(card => {
+    observer.observe(card);
+});
+
+// Katılımcı Listesi Etkileşimi
+const emirCard = document.getElementById('emirCard');
+if (emirCard) {
+    emirCard.addEventListener('click', () => {
+        emirCard.classList.toggle('active');
+    });
+
+    const actionButtons = emirCard.querySelectorAll('.action-button');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.stopPropagation(); // Kartın tıklama olayını engelle
+            const action = button.dataset.action;
+            let whatsappMessage = '';
+
+            if (action === 'confirm') {
+                whatsappMessage = 'Selam Halil, futbol maçına geliyorum!';
+                emirCard.querySelector('.status-text').innerText = '✅ Geliyor';
+                emirCard.dataset.status = 'geliyor';
+                emirCard.style.backgroundColor = 'rgba(144, 238, 144, 0.5)'; // Açık yeşil ton
+                if (body.classList.contains('dark-mode')) {
+                     emirCard.style.backgroundColor = 'rgba(76, 175, 80, 0.4)';
+                }
+            } else if (action === 'decline') {
+                whatsappMessage = 'Selam Halil, maalesef bu defa katılamıyorum ama bir dahaki sefere kesin!';
+                emirCard.querySelector('.status-text').innerText = '❌ Gelemeyecek';
+                emirCard.dataset.status = 'gelemeyecek';
+                emirCard.style.backgroundColor = 'rgba(255, 99, 71, 0.3)'; // Hafif kırmızı ton
+                 if (body.classList.contains('dark-mode')) {
+                    emirCard.style.backgroundColor = 'rgba(244, 67, 54, 0.4)';
+                 }
+            }
+
+            const whatsappUrl = `https://wa.me/4915773817996?text=${encodeURIComponent(whatsappMessage)}`;
+            window.open(whatsappUrl, '_blank');
+            emirCard.classList.remove('active'); // Butonlara tıklayınca kapanır
+        });
+    });
+}
+
+// Hatırlatma Sistemi
+const whatsappReminderCheckbox = document.getElementById('whatsappReminder');
+const calendarReminderButton = document.getElementById('calendarReminder');
+
+whatsappReminderCheckbox.addEventListener('change', () => {
+    if (whatsappReminderCheckbox.checked) {
+        // Kullanıcıya WhatsApp hatırlatma izni için bir uyarı veya yönlendirme yapabilirsiniz.
+        alert('WhatsApp hatırlatmaları için bildirim izni vermeniz gerekebilir.');
+        // Gerçek bir uygulamada burada arka uç ile entegrasyon gerekir.
+    }
+});
+
+calendarReminderButton.addEventListener('click', () => {
+    const eventName = 'Futbol Maçı Daveti';
+    const eventLocation = 'SG Rot-Weiß Wetzlar 1920 e.V., Gabelsbergerstraße 66, 35576 Wetzlar';
+    const eventStartTime = new Date('2025-06-20T16:00:00');
+    const eventEndTime = new Date(eventStartTime.getTime() + 2 * 60 * 60 * 1000); // 2 saat sonra bitiyor
+
+    // iCal formatında dosya oluşturma
+    const calContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Higer Yazilim//NONSGML v1.0//EN
+BEGIN:VEVENT
+UID:${Date.now()}
+DTSTAMP:${formatDateToICAL(new Date())}
+DTSTART:${formatDateToICAL(eventStartTime)}
+DTEND:${formatDateToICAL(eventEndTime)}
+SUMMARY:${eventName}
+LOCATION:${eventLocation}
+DESCRIPTION:Halil'in davet ettiği futbol maçı! Kaçırma!
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([calContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'futbol_maci_hatirlatici.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('Takvim etkinliği indirildi. Açmak için çift tıklayın.');
+});
+
+// iCal tarih formatı için yardımcı fonksiyon
+function formatDateToICAL(date) {
+    return date.toISOString().replace(/-|:|\.\d\d\d/g, '') + 'Z';
+}
+
+// PWA (Progressive Web App) Özelliği (manifest.json ve service-worker.js gerektirir)
+// Bu özellik için ayrı bir `manifest.json` ve `service-worker.js` dosyaları oluşturmanız gerekecektir.
+// Aşağıdaki kod sadece PWA kurulumunun bir parçasıdır.
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+    });
+}
+
+// Bildirim isteme (tarayıcı push bildirimleri için)
+// Bu da sunucu tarafı entegrasyonu gerektirir.
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('Bildirim izni verildi.');
+                // Burada sunucuya abone olma ve bildirim gönderme mantığı eklenecek
+            } else {
+                console.warn('Bildirim izni reddedildi veya engellendi.');
+            }
+        });
+    }
+}
+// Örneğin, "Bana Hatırlat" bölümüne bir buton ekleyip bu fonksiyonu çağırabilirsiniz.
+// requestNotificationPermission();
+
+// Butonlara basıldığında hafif titreşim efekti
+document.querySelectorAll('button, a.map-button, a.mail-button').forEach(button => {
+    button.addEventListener('mousedown', function() {
+        this.style.transform = 'scale(0.98)';
+        this.style.boxShadow = '0 2px 5px rgba(0,0,0,0.2)';
+    });
+    button.addEventListener('mouseup', function() {
+        this.style.transform = 'scale(1)';
+        this.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+    });
+});</script></body></html>
